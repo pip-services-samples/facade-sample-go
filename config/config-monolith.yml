@@ -1,0 +1,74 @@
+---
+# Container info
+- descriptor: "pip-services:container-info:default:default:*"
+  name: "pip-facades-example"
+  description: "Example Pip.Services facade"
+
+# Console logger
+- descriptor: "pip-services:logger:console:default:*"
+  level: trace
+
+# Log counters
+- descriptor: "pip-services:counters:log:default:*"
+
+# Mongodb connection
+- descriptor: "pip-services:connection:mongodb:default:*"
+  connection:
+    uri: {{{MONGO_SERVICE_URI}}}
+    host: {{{MONGO_SERVICE_HOST}}}{{#unless MONGO_SERVICE_HOST}}localhost{{/unless}}
+    port: {{MONGO_SERVICE_PORT}}{{#unless MONGO_SERVICE_PORT}}27017{{/unless}}
+    database: {{MONGO_DB}}{{#unless MONGO_DB}}app{{/unless}}
+  credential:
+    username: {{MONGO_USER}}
+    password: {{MONGO_PASS}}
+
+# # Activities components
+# - descriptor: "pip-services-activities:persistence:mongodb:default:*"
+# - descriptor: "pip-services-activities:controller:default:default:*"
+# - descriptor: "pip-services-activities:client:direct:default:*"
+
+# Accounts components
+- descriptor: "pip-services-accounts:persistence:mongodb:default:*"
+- descriptor: "pip-services-accounts:controller:default:default:*"
+- descriptor: "pip-services-accounts:client:direct:default:*"
+
+# Roles components
+- descriptor: "pip-services-roles:persistence:mongodb:default:*"
+- descriptor: "pip-services-roles:controller:default:default:*"
+- descriptor: "pip-services-roles:client:direct:default:*"
+
+# Passwords components
+- descriptor: "pip-services-passwords:persistence:mongodb:default:*"
+- descriptor: "pip-services-passwords:controller:default:default:*"
+- descriptor: "pip-services-passwords:client:direct:default:*"
+
+# Session components
+- descriptor: "pip-services-sessions:persistence:mongodb:default:*"
+- descriptor: "pip-services-sessions:controller:default:default:*"
+- descriptor: "pip-services-sessions:client:direct:default:*"
+
+# Beacons components
+- descriptor: "pip-services-beacons:persistence:mongodb:default:*"
+- descriptor: "pip-services-beacons:controller:default:default:*"
+- descriptor: "pip-services-beacons:client:direct:default:*"
+
+# Main facade service
+- descriptor: "pip-services:endpoint:http:default:*"
+  root_path: ""
+  connection:
+    protocol: "http"
+    host: "0.0.0.0"
+    port: 8080
+  options:
+    debug: true
+    maintenance_enabled: false
+    max_req_size: "1mb"
+
+# Facade API V1
+- descriptor: "pip-facades-example:service:http:default:1.0"
+
+# Hearbeat service
+- descriptor: "pip-services:heartbeat-service:http:default:1.0"
+
+# Status service
+- descriptor: "pip-services:status-service:http:default:1.0"

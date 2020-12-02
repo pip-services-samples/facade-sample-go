@@ -1,0 +1,79 @@
+---
+# Container info
+- descriptor: "pip-services:container-info:default:default:*"
+  name: "pip-facades-example"
+  description: "Example Pip.Services facade"
+
+# Console logger
+- descriptor: "pip-services:logger:console:default:*"
+  level: trace
+
+# Log counters
+- descriptor: "pip-services:counters:log:default:*"
+
+# Mongodb connection
+- descriptor: "pip-services:connection:mongodb:default:*"
+  connection:
+    uri: {{{MONGO_SERVICE_URI}}}
+    host: {{{MONGO_SERVICE_HOST}}}{{#unless MONGO_SERVICE_HOST}}localhost{{/unless}}
+    port: {{MONGO_SERVICE_PORT}}{{#unless MONGO_SERVICE_PORT}}27017{{/unless}}
+    database: {{MONGO_DB}}{{#unless MONGO_DB}}app{{/unless}}
+  credential:
+    username: {{MONGO_USER}}
+    password: {{MONGO_PASS}}
+
+# Accounts components
+- descriptor: "pip-services-accounts:client:http:default:*"
+  connection:
+    protocol: "http"
+    host: "localhost"
+    port: 8082
+
+# Roles components
+- descriptor: "pip-services-roles:client:http:default:*"
+  connection:
+    protocol: "http"
+    host: "localhost"
+    port: 8083
+
+# Passwords components
+- descriptor: "pip-services-passwords:client:http:default:*"
+  connection:
+    protocol: "http"
+    host: "localhost"
+    port: 8084
+
+# Session components
+- descriptor: "pip-services-sessions:client:http:default:*"
+  connection:
+    protocol: "http"
+    host: "localhost"
+    port: 8085
+
+# Beacons components
+- descriptor: "pip-services-beacons:client:http:default:*"
+  connection:
+    protocol: "http"
+    host: "localhost"
+    port: 8086
+
+# Main facade service
+- descriptor: "pip-services:endpoint:http:default:*"
+  root_path: ""
+  connection:
+    protocol: "http"
+    host: "0.0.0.0"
+    port: 8080
+  options:
+    debug: true
+    maintenance_enabled: false
+    max_req_size: "1mb"
+
+# Facade API V1
+- descriptor: "pip-facades-example:service:http:default:1.0"
+
+# Hearbeat service
+- descriptor: "pip-services:heartbeat-service:http:default:1.0"
+
+# Status service
+- descriptor: "pip-services:status-service:http:default:1.0"

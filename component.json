@@ -1,0 +1,6 @@
+{
+    "name":  "pip-facades-sample-node",
+    "registry":  "pip-test",
+    "version":  "1.0.0",
+    "build":  1
+}
