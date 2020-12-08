@@ -189,18 +189,17 @@ func (c *SessionsOperationsV1) Signup(res http.ResponseWriter, req *http.Request
 	go func() {
 		defer wg.Done()
 		// Use email by default
-		login := signupData["login"].(string)
-		if login == "" {
-			login = signupData["email"].(string)
+		login, ok := signupData["login"].(string)
+		if !ok {
+			login, _ = signupData["email"].(string)
 		}
 		// Create account
-		newAccount := accclients1.AccountV1{
-			Name:     signupData["name"].(string),
-			Login:    login,
-			Language: signupData["language"].(string),
-			Theme:    signupData["theme"].(string),
-			TimeZone: signupData["time_zone"].(string),
-		}
+		newAccount := accclients1.AccountV1{}
+		newAccount.Name, _ = signupData["name"].(string)
+		newAccount.Login = login
+		newAccount.Language, _ = signupData["language"].(string)
+		newAccount.Theme, _ = signupData["theme"].(string)
+		newAccount.TimeZone, _ = signupData["time_zone"].(string)
 
 		account, err := c.accountsClient.CreateAccount("", &newAccount)
 		if err != nil {

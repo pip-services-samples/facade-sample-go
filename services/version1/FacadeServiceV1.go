@@ -22,6 +22,7 @@ func NewFacadeServiceV1() *FacadeServiceV1 {
 		beaconsOperations:  operations1.NewBeaconsOperationsV1(),
 	}
 	c.BaseRoute = "api/v1"
+	c.IRegisterable = &c
 	return &c
 }
 
@@ -32,7 +33,7 @@ func (c *FacadeServiceV1) Configure(config *cconf.ConfigParams) {
 	c.beaconsOperations.Configure(config)
 }
 
-func (c *FacadeServiceV1) setReferences(references cref.IReferences) {
+func (c *FacadeServiceV1) SetReferences(references cref.IReferences) {
 	c.RestService.SetReferences(references)
 
 	c.sessionsOperations.SetReferences(references)

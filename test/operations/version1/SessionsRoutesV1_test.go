@@ -60,7 +60,7 @@ func (c *sessionRoutesV1Test) testNotSignupWithTheSameEmail(t *testing.T) {
 	session := make(map[string]interface{})
 	err := c.rest.Post("/api/v1/users/signup", c.user, &session)
 	assert.Nil(t, err)
-	// Try to sign up agai
+	// Try to sign up again
 	err = c.rest.Post("/api/v1/users/signup", c.user, &session)
 	assert.NotNil(t, err)
 }
@@ -89,21 +89,29 @@ func (c *sessionRoutesV1Test) testShouldSigninWithEmailAndPassword(t *testing.T)
 	assert.NotNil(t, err)
 }
 
-func TestSessionRoutesV1(t *testing.T) {
+func TestSignupNewUser(t *testing.T) {
 	c := newSessionRoutesV1Test()
 
 	c.setup(t)
 	t.Run("Signup New User", c.testSignupNewUser)
 	c.teardown(t)
+}
 
+func TestNotSignupWithTheSameEmail(t *testing.T) {
+	c := newSessionRoutesV1Test()
 	c.setup(t)
 	t.Run("Not Signup With The Same Email", c.testNotSignupWithTheSameEmail)
 	c.teardown(t)
-
+}
+func TestShouldSignout(t *testing.T) {
+	c := newSessionRoutesV1Test()
 	c.setup(t)
 	t.Run("Should Signout", c.testShouldSignout)
 	c.teardown(t)
 
+}
+func TestShouldSigninWithEmailAndPassword(t *testing.T) {
+	c := newSessionRoutesV1Test()
 	c.setup(t)
 	t.Run("Should Signin With Email And Password", c.testShouldSigninWithEmailAndPassword)
 	c.teardown(t)

@@ -8,6 +8,8 @@ import (
 	operations1 "github.com/pip-services-samples/pip-samples-facade-go/operations/version1"
 	services1 "github.com/pip-services-samples/pip-samples-facade-go/services/version1"
 	accclients1 "github.com/pip-services-users/pip-clients-accounts-go/version1"
+	passclients1 "github.com/pip-services-users/pip-clients-passwords-go/version1"
+	roleclients1 "github.com/pip-services-users/pip-clients-roles-go/version1"
 	sessclients1 "github.com/pip-services-users/pip-clients-sessions-go/version1"
 	cconf "github.com/pip-services3-go/pip-services3-commons-go/config"
 	cref "github.com/pip-services3-go/pip-services3-commons-go/refer"
@@ -60,6 +62,9 @@ func (c *TestReferences) appendDependencies() {
 	// Add user management services
 	c.Put(cref.NewDescriptor("pip-services-accounts", "client", "memory", "default", "*"), accclients1.NewAccountsMemoryClientV1(nil))
 	c.Put(cref.NewDescriptor("pip-services-sessions", "client", "memory", "default", "*"), sessclients1.NewSessionsMemoryClientV1())
+	c.Put(cref.NewDescriptor("pip-services-passwords", "client", "commandable-http", "default", "*"), passclients1.NewPasswordsHttpCommandableClientV1())
+	c.Put(cref.NewDescriptor("pip-services-roles", "client", "commandable-http", "default", "*"), roleclients1.NewRolesMemoryClientV1())
+
 	// Add content management services
 	// Beacons
 	c.Put(cref.NewDescriptor("pip-services-beacons", "client", "memory", "default", "*"), bclients1.NewBeaconsMemoryClientV1(nil))
@@ -78,6 +83,17 @@ func (c *TestReferences) configureService() {
 		"connection.protocol", "http",
 		"connection.host", "0.0.0.0",
 		"connection.port", 3000,
+	))
+
+	dependency, _ = c.GetOneRequired(cref.NewDescriptor("pip-services-passwords", "client", "*", "default", "*"))
+	passClient, ok2 := dependency.(*passclients1.PasswordsHttpCommandableClientV1)
+	if !ok2 {
+		panic("SessionOperationsV1: Cant't resolv dependency 'client' to IPasswordsClientV1")
+	}
+	passClient.Configure(cconf.NewConfigParamsFromTuples(
+		"connection.protocol", "http",
+		"connection.host", "localhost",
+		"connection.port", 3001,
 	))
 }
 
