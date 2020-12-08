@@ -72,10 +72,10 @@ func (c *FacadeServiceV1) registerContentManagementRoutes(auth *AuthorizerV1) {
 
 func (c *FacadeServiceV1) registerUsersRoutes(auth *AuthorizerV1) {
 	// Session Routes
-	c.registerRouteWithAuth("post", "/users/signup", nil, auth.Anybody(),
+	c.RegisterRouteWithAuth("post", "/users/signup", nil, auth.Anybody(),
 		func(res http.ResponseWriter, req *http.Request) { c.sessionsOperations.Signup(res, req) })
-	c.registerRouteWithAuth("post", "/users/signin", nil, auth.Anybody(),
+	c.RegisterRouteWithAuth("post", "/users/signin", nil, auth.Anybody(),
 		func(res http.ResponseWriter, req *http.Request) { c.sessionsOperations.Signin(res, req) })
-	c.registerRouteWithAuth("post", "/users/signout", nil, auth.Anybody(),
+	c.RegisterRouteWithAuth("post", "/users/signout", nil, auth.Anybody(),
 		func(res http.ResponseWriter, req *http.Request) { c.sessionsOperations.Signout(res, req) })
 }

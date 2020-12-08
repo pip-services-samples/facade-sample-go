@@ -3,8 +3,14 @@ package operations1
 import (
 	"context"
 	"net/http"
+	"sync"
+	"time"
 
+	accclients1 "github.com/pip-services-users/pip-clients-accounts-go/version1"
+	passclients1 "github.com/pip-services-users/pip-clients-passwords-go/version1"
+	roleclients1 "github.com/pip-services-users/pip-clients-roles-go/version1"
 	sessclients1 "github.com/pip-services-users/pip-clients-sessions-go/version1"
+
 	cconf "github.com/pip-services3-go/pip-services3-commons-go/config"
 	cerr "github.com/pip-services3-go/pip-services3-commons-go/errors"
 	cref "github.com/pip-services3-go/pip-services3-commons-go/refer"
@@ -43,6 +49,7 @@ func NewSessionsOperationsV1() *SessionsOperationsV1 {
 	c.DependencyResolver.Put("passwords", cref.NewDescriptor("pip-services-passwords", "client", "*", "*", "1.0"))
 	c.DependencyResolver.Put("roles", cref.NewDescriptor("pip-services-roles", "client", "*", "*", "1.0"))
 	c.DependencyResolver.Put("sessions", cref.NewDescriptor("pip-services-sessions", "client", "*", "*", "1.0"))
+	return &c
 }
 
 func (c *SessionsOperationsV1) Configure(config *cconf.ConfigParams) {
@@ -116,174 +123,186 @@ func (c *SessionsOperationsV1) LoadSession(res http.ResponseWriter, req *http.Re
 }
 
 func (c *SessionsOperationsV1) OpenSession(res http.ResponseWriter, req *http.Request, account *accclients1.AccountV1, roles []string) {
-	// let session: SessionV1;
-	// let passwordInfo: UserPasswordInfoV1;
-	// let settings: ConfigParams;
-	// console.log("open session");
-	// async.series([
-	//     (callback) => {
+	var session *sessclients1.SessionV1
+	var settings cconf.ConfigParams
 
-	//         c.passwordsClient.getPasswordInfo(
-	//             nil, account.id, (err, data) => {
-	//                 passwordInfo = data;
-	//                 callback(err);
-	//             }
-	//         )
-	//     },
-	//     // Open a new user session
-	//     (callback) => {
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 
-	//         let user = <SessionUserV1>{
-	//             id: account.id,
-	//             name: account.name,
-	//             login: account.login,
-	//             create_time: account.create_time,
-	//             time_zone: account.time_zone,
-	//             language: account.language,
-	//             theme: account.theme,
-	//             roles: roles,
-	//             settings: settings,
-	//             change_pwd_time: passwordInfo != nil ? passwordInfo.change_time : nil,
-	//             custom_hdr: account.custom_hdr,
-	//             custom_dat: account.custom_dat
-	//         };
+	go func() {
 
-	//         let address = HttpRequestDetector.detectAddress(req);
-	//         let client = HttpRequestDetector.detectBrowser(req);
+		defer wg.Done()
+		passwordInfo, err := c.passwordsClient.GetPasswordInfo("", account.Id)
+		if err != nil {
+			c.SendError(res, req, err)
+			return
+		}
 
-	//         c.sessionsClient.openSession(
-	//             nil, account.id, account.name,
-	//             address, client, user, nil,
-	//             (err, data) => {
-	//                 session = data;
-	//                 callback(err);
-	//             }
-	//         );
-	//     },
-	// ], (err) => {
-	//     if (err)
-	//         c.sendError(req, res, err);
-	//     else {
-	//         res.json(session);
-	//     }
-	// });
+		var changePwdTime time.Time
+		if passwordInfo != nil {
+			changePwdTime = passwordInfo.ChangeTime
+		}
+
+		var user = SessionUserV1{
+			Id:            account.Id,
+			Name:          account.Name,
+			Login:         account.Login,
+			CreateTime:    account.CreateTime,
+			TimeZone:      account.TimeZone,
+			Language:      account.Language,
+			Theme:         account.Theme,
+			Roles:         roles,
+			Settings:      settings,
+			ChangePwdTime: changePwdTime,
+			CustomHdr:     account.CustomHdr,
+			CustomDat:     account.CustomDat,
+		}
+
+		address := rpcservices.HttpRequestDetector.DetectAddress(req)
+		client := rpcservices.HttpRequestDetector.DetectBrowser(req)
+
+		session, err = c.sessionsClient.OpenSession("", account.Id, account.Name, address, client, user, nil)
+		if err != nil {
+			c.SendError(res, req, err)
+			return
+		}
+		//res.json(session)
+		c.SendResult(res, req, session, nil)
+	}()
+
+	wg.Wait()
+
 }
 
 func (c *SessionsOperationsV1) Signup(res http.ResponseWriter, req *http.Request) {
-	// let signupData = req.body;
-	// let account: AccountV1 = nil;
-	// let roles: string[] = signupData.roles != nil && _.isArray(signupData.roles) ? signupData.roles : [];
 
-	// async.series([
-	//     // Create account
-	//     (callback) => {
-	//         let newAccount = <AccountV1>{
-	//             name: signupData.name,
-	//             login: signupData.login || signupData.email, // Use email by default
-	//             language: signupData.language,
-	//             theme: signupData.theme,
-	//             time_zone: signupData.time_zone
-	//         };
+	signupData := make(map[string]interface{})
+	c.DecodeBody(req, &signupData)
+	r, ok := signupData["roles"].([]string)
+	roles := make([]string, 0)
+	if ok {
+		roles = append(roles, r...)
+	}
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 
-	//         c.accountsClient.createAccount(
-	//             nil, newAccount,
-	//             (err, data) => {
-	//                 account = data;
-	//                 callback(err);
-	//             }
-	//         )
-	//     },
-	//     // Create password for the account
-	//     (callback) => {
-	//         let password = signupData.password;
+	go func() {
+		defer wg.Done()
+		// Use email by default
+		login := signupData["login"].(string)
+		if login == "" {
+			login = signupData["email"].(string)
+		}
+		// Create account
+		newAccount := accclients1.AccountV1{
+			Name:     signupData["name"].(string),
+			Login:    login,
+			Language: signupData["language"].(string),
+			Theme:    signupData["theme"].(string),
+			TimeZone: signupData["time_zone"].(string),
+		}
 
-	//         c.passwordsClient.setPassword(
-	//             nil, account.id, password, callback
-	//         );
-	//     },
-	//     // Create roles for the account
-	//     (callback) => {
-	//         if (roles.length > 0) {
-	//             c.rolesClient.grantRoles(
-	//                 nil, account.id, roles, callback
-	//             );
-	//         } else {
-	//             callback();
-	//         }
-	//     }
-	// ], (err) => {
-	//     if (err)
-	//         c.sendError(req, res, err);
-	//     else
-	//         c.openSession(req, res, account, roles);
-	// });
+		account, err := c.accountsClient.CreateAccount("", &newAccount)
+		if err != nil {
+			c.SendError(res, req, err)
+			return
+		}
+
+		// Create password for the account
+		password, _ := signupData["password"].(string)
+
+		err = c.passwordsClient.SetPassword(
+			"", account.Id, password)
+		if err != nil {
+			c.SendError(res, req, err)
+			return
+		}
+		// Create roles for the account
+		if len(roles) > 0 {
+			c.rolesClient.GrantRoles(
+				"", account.Id, roles)
+		}
+		c.OpenSession(res, req, account, roles)
+	}()
+	wg.Wait()
 }
 
 func (c *SessionsOperationsV1) Signin(res http.ResponseWriter, req *http.Request) {
-	// let login = req.param("login");
-	// let password = req.param("password");
 
-	// let account: AccountV1;
-	// let roles: string[] = [];
+	login := c.GetParam(req, "login")
+	password := c.GetParam(req, "password")
 
-	// async.series([
-	//     // Find user account
-	//     (callback) => {
-	//         c.accountsClient.getAccountByIdOrLogin(nil, login, (err, data) => {
-	//             if (err == nil && data == nil) {
-	//                 err = new BadRequestException(
-	//                     nil,
-	//                     "WRONG_LOGIN",
-	//                     "Account " + login + " was not found"
-	//                 ).withDetails("login", login);
-	//             }
+	roles := make([]string, 0)
 
-	//             account = data;
-	//             callback(err);
-	//         });
-	//     },
-	//     // Authenticate user
-	//     (callback) => {
-	//         c.passwordsClient.authenticate(nil, account.id, password, (err, result) => {
-	//             // wrong password error is UNKNOWN when use http client
-	//             if ( (err == nil && result == false) || (err && err.cause == "Invalid password") )  {
-	//                 err = new BadRequestException(
-	//                     nil,
-	//                     "WRONG_PASSWORD",
-	//                     "Wrong password for account " + login
-	//                 ).withDetails("login", login);
-	//             }
+	wg := sync.WaitGroup{}
+	wg.Add(1)
 
-	//             callback(err);
-	//         });
-	//     },
-	//     // Retrieve user roles
-	//     (callback) => {
-	//         if (c.rolesClient) {
-	//             c.rolesClient.getRolesById(nil, account.id, (err, data) => {
-	//                 roles = data;
-	//                 callback(err);
-	//             });
-	//         } else {
-	//             roles = [];
-	//             callback();
-	//         }
-	//     }
-	// ], (err) => {
-	//     if (err)
-	//         c.sendError(req, res, err);
-	//     else
-	//         c.openSession(req, res, account, roles);
-	// });
+	go func() {
+		defer wg.Done()
+		// Find user account
+
+		account, err := c.accountsClient.GetAccountByIdOrLogin("", login)
+		if err != nil {
+			c.SendError(res, req, err)
+			return
+		}
+		if err == nil && account == nil {
+			err = cerr.NewBadRequestError(
+				"",
+				"WRONG_LOGIN",
+				"Account "+login+" was not found",
+			).WithDetails("login", login)
+		}
+
+		// Authenticate user
+		result, err := c.passwordsClient.Authenticate("", account.Id, password)
+
+		// wrong password error is UNKNOWN when use http client
+		if (err == nil && result == false) || (err != nil && err.(*cerr.ApplicationError).Cause == "Invalid password") {
+			err = cerr.NewBadRequestError(
+				"",
+				"WRONG_PASSWORD",
+				"Wrong password for account "+login,
+			).WithDetails("login", login)
+			if err != nil {
+				c.SendError(res, req, err)
+				return
+			}
+		}
+
+		// Retrieve user roles
+		if c.rolesClient != nil {
+			roles, err = c.rolesClient.GetRolesById("", account.Id)
+			if err != nil {
+				c.SendError(res, req, err)
+				return
+			}
+
+		} else {
+			roles = make([]string, 0)
+		}
+
+		c.OpenSession(res, req, account, roles)
+	}()
+	wg.Wait()
+
 }
 
 func (c *SessionsOperationsV1) Signout(res http.ResponseWriter, req *http.Request) {
-	// if (req.session_id) {
-	//     c.sessionsClient.closeSession(nil, req.session_id, (err, session) => {
-	//         if (err) c.sendError(req, res, err);
-	//         else res.json(204);
-	//     });
-	// } else {
-	//     res.json(204);
-	// }
+
+	sessionId, ok := req.Context().Value("session_id").(string)
+	if ok {
+		_, err := c.sessionsClient.CloseSession("", sessionId)
+
+		if err != nil {
+			c.SendError(res, req, err)
+		} else {
+			// res.json(204);
+			c.SendEmptyResult(res, req, nil)
+		}
+
+	} else {
+		//res.json(204);
+		c.SendEmptyResult(res, req, nil)
+	}
 }

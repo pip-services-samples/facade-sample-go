@@ -1,74 +1,115 @@
-
 package test_fixture
 
-// let restify = require('restify-clients');
+import (
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"strings"
 
-// export class TestRestClient {
-//     private _rest: any;
+	cerr "github.com/pip-services3-go/pip-services3-commons-go/errors"
+)
 
-//     public constructor() {
-//         let url = 'http://localhost:3000';
-//         this._rest = restify.createJsonClient({ url: url, version: '*' });
-//     }
+type TestRestClient struct {
+	url string
+}
 
-//     public get(path: string,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         delete this._rest.headers['x-session-id'];
-//         this._rest.get(path, callback);
-//     }
+func NewTestRestClient() *TestRestClient {
+	c := TestRestClient{
+		url: "http://localhost:3000",
+	}
+	return &c
+}
 
-//     public head(path: string,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         delete this._rest.headers['x-session-id'];
-//         this._rest.head(path, callback)
-//     }
+func (c *TestRestClient) invoke(method string,
+	route string, headers map[string]string, body interface{}, result interface{}) error {
+	var url string = c.url + route
 
-//     public post(path: string, params: any,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         delete this._rest.headers['x-session-id'];
-//         this._rest.post(path, params, callback);
-//     }
+	method = strings.ToUpper(method)
+	var bodyReader *bytes.Reader = bytes.NewReader(make([]byte, 0, 0))
+	if body != nil {
+		jsonBody, _ := json.Marshal(body)
+		bodyReader = bytes.NewReader(jsonBody)
+	}
 
-//     public put(path: string, params: any,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         delete this._rest.headers['x-session-id'];
-//         this._rest.put(path, params, callback);
-//     }
+	req, err := http.NewRequest(method, url, bodyReader)
 
-//     public del(path: string,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         delete this._rest.headers['x-session-id'];
-//         this._rest.del(path, callback);
-//     }
+	if err != nil {
+		return err
+	}
+	// Set headers
+	req.Header.Set("Accept", "application/json")
+	if headers != nil && len(headers) > 0 {
+		for k, v := range headers {
+			req.Header.Set(k, v)
+		}
+	}
+	client := http.Client{}
+	response, respErr := client.Do(req)
 
-//     public getAsUser(sessionId: string, path: string,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         this._rest.headers['x-session-id'] = sessionId;
-//         this._rest.get(path, callback);
-//     }
+	if respErr != nil {
+		return respErr
+	}
 
-//     public headAsUser(sessionId: string, path: string,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         this._rest.headers['x-session-id'] = sessionId;
-//         this._rest.head(path, callback)
-//     }
+	if response.StatusCode == 204 {
+		return nil
+	}
 
-//     public postAsUser(sessionId: string, path: string, params: any,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         this._rest.headers['x-session-id'] = sessionId;
-//         this._rest.post(path, params, callback);
-//     }
+	resBody, bodyErr := ioutil.ReadAll(response.Body)
+	if bodyErr != nil {
+		return bodyErr
+	}
 
-//     public putAsUser(sessionId: string, path: string, params: any,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         this._rest.headers['x-session-id'] = sessionId;
-//         this._rest.put(path, params, callback);
-//     }
+	if response.StatusCode >= 400 {
+		appErr := cerr.ApplicationError{}
+		json.Unmarshal(resBody, &appErr)
+		return &appErr
+	}
 
-//     public delAsUser(sessionId: string, path: string,
-//         callback: (err: any, req: any, res: any, result: any) => void): void {
-//         this._rest.headers['x-session-id'] = sessionId;
-//         this._rest.del(path, callback);
-//     }
+	if result == nil {
+		return nil
+	}
 
-// }
+	jsonErr := json.Unmarshal(resBody, result)
+	return jsonErr
+}
+
+func (c *TestRestClient) Get(path string, result interface{}) error {
+	return c.invoke("get", path, nil, nil, result)
+}
+
+func (c *TestRestClient) Head(path string, result interface{}) error {
+	return c.invoke("head", path, nil, nil, result)
+}
+
+func (c *TestRestClient) Post(path string, params interface{}, result interface{}) error {
+	return c.invoke("post", path, nil, params, result)
+}
+
+func (c *TestRestClient) Put(path string, params interface{}, result interface{}) error {
+	return c.invoke("put", path, nil, params, result)
+}
+
+func (c *TestRestClient) Del(path string, result interface{}) error {
+	return c.invoke("del", path, nil, nil, result)
+}
+
+func (c *TestRestClient) GetAsUser(sessionId string, path string, result interface{}) error {
+	return c.invoke("get", path, map[string]string{"x-session-id": sessionId}, nil, result)
+}
+
+func (c *TestRestClient) HeadAsUser(sessionId string, path string, result interface{}) error {
+	return c.invoke("head", path, map[string]string{"x-session-id": sessionId}, nil, result)
+}
+
+func (c *TestRestClient) PostAsUser(sessionId string, path string, params interface{}, result interface{}) error {
+	return c.invoke("post", path, map[string]string{"x-session-id": sessionId}, params, result)
+}
+
+func (c *TestRestClient) PutAsUser(sessionId string, path string, params interface{}, result interface{}) error {
+	return c.invoke("put", path, map[string]string{"x-session-id": sessionId}, params, result)
+}
+
+func (c *TestRestClient) DelAsUser(sessionId string, path string, result interface{}) error {
+	return c.invoke("del", path, map[string]string{"x-session-id": sessionId}, nil, result)
+}

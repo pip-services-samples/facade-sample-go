@@ -1,135 +1,170 @@
 package test_fixture
 
-// let _ = require('lodash');
+import (
+	"time"
 
-// import { ConfigParams } from 'pip-services3-commons-node';
-// import { Descriptor } from 'pip-services3-commons-node';
+	bclients1 "github.com/pip-services-samples/pip-clients-beacons-go/clients/version1"
+	fbuild "github.com/pip-services-samples/pip-samples-facade-go/build"
+	operations1 "github.com/pip-services-samples/pip-samples-facade-go/operations/version1"
+	services1 "github.com/pip-services-samples/pip-samples-facade-go/services/version1"
+	accclients1 "github.com/pip-services-users/pip-clients-accounts-go/version1"
+	sessclients1 "github.com/pip-services-users/pip-clients-sessions-go/version1"
+	cconf "github.com/pip-services3-go/pip-services3-commons-go/config"
+	cref "github.com/pip-services3-go/pip-services3-commons-go/refer"
+	cbuild "github.com/pip-services3-go/pip-services3-components-go/build"
+	bref "github.com/pip-services3-go/pip-services3-container-go/refer"
+	rpcbuild "github.com/pip-services3-go/pip-services3-rpc-go/build"
+	rpcservices "github.com/pip-services3-go/pip-services3-rpc-go/services"
+)
 
-// import { CompositeFactory } from 'pip-services3-components-node';
-// import { ManagedReferences } from 'pip-services3-container-node';
+type TestReferences struct {
+	*bref.ManagedReferences
 
-// import { IAccountsClientV1, AccountV1 } from 'pip-clients-accounts-node';
-// import { ISessionsClientV1 } from 'pip-clients-sessions-node';
+	factory *cbuild.CompositeFactory
+}
 
-// import { TestUsers } from './TestUsers';
-// import { ClientFacadeFactory } from '../../src/build/ClientFacadeFactory';
-// import { ServiceFacadeFactory } from '../../src/build/ServiceFacadeFactory';
-// import { HttpEndpoint } from 'pip-services3-rpc-node';
-// import { DefaultRpcFactory } from 'pip-services3-rpc-node';
-// import { FacadeServiceV1 } from '../../src/services/version1/FacadeServiceV1';
-// import { AccountsMemoryClientV1 } from 'pip-clients-accounts-node';
-// import { SessionsMemoryClientV1 } from 'pip-clients-sessions-node';
-// import { BeaconsMemoryClientV1 } from 'pip-clients-beacons-node';
+func NewTestReferences() *TestReferences {
+	c := TestReferences{
+		ManagedReferences: bref.NewManagedReferences(nil),
+		factory:           cbuild.NewCompositeFactory(),
+	}
 
-// export class TestReferences extends ManagedReferences {
-//     private _factory = new CompositeFactory();
+	c.setupFactories()
+	c.appendDependencies()
+	c.configureService()
+	c.createUsersAndSessions()
+	return &c
+}
 
-//     public constructor() {
-//         super();
+func (c *TestReferences) setupFactories() {
+	c.factory.Add(fbuild.NewClientFacadeFactory())
+	c.factory.Add(fbuild.NewServiceFacadeFactory())
+	c.factory.Add(rpcbuild.NewDefaultRpcFactory())
+}
 
-//         this.setupFactories();
-//         this.appendDependencies();
-//         this.configureService();
-//         this.createUsersAndSessions();
-//     }
+func (c *TestReferences) Append(descriptor *cref.Descriptor) {
+	component, err := c.factory.Create(descriptor)
+	if err != nil {
+		return
+	}
+	c.Put(descriptor, component)
+}
 
-//     private setupFactories() {
-//         this._factory.add(new ClientFacadeFactory());
-//         this._factory.add(new ServiceFacadeFactory());
-//         this._factory.add(new DefaultRpcFactory());
-//     }
+func (c *TestReferences) appendDependencies() {
+	// Add factories
+	c.Put(nil, c.factory)
 
-//     public append(descriptor: Descriptor): void {
-//         let component = this._factory.create(descriptor);
-//         this.put(descriptor, component);
-//     }
+	// Add service
+	c.Put(nil, services1.NewFacadeServiceV1())
 
-//     private appendDependencies() {
-//         // Add factories
-//         this.put(null, this._factory);
+	// Add user management services
+	c.Put(cref.NewDescriptor("pip-services-accounts", "client", "memory", "default", "*"), accclients1.NewAccountsMemoryClientV1(nil))
+	c.Put(cref.NewDescriptor("pip-services-sessions", "client", "memory", "default", "*"), sessclients1.NewSessionsMemoryClientV1())
+	// Add content management services
+	// Beacons
+	c.Put(cref.NewDescriptor("pip-services-beacons", "client", "memory", "default", "*"), bclients1.NewBeaconsMemoryClientV1(nil))
+}
 
-//         // Add service
-//         this.put(null, new FacadeServiceV1());
+func (c *TestReferences) configureService() {
+	// Configure Facade service
+	dependency, _ := c.GetOneRequired(cref.NewDescriptor("pip-services", "endpoint", "http", "default", "*"))
+	service, ok1 := dependency.(*rpcservices.HttpEndpoint)
+	if !ok1 {
+		panic("TestReferences: Cant't resolv dependency 'client' to IAccountsClientV1")
+	}
 
-//         // Add user management services
-//         this.put(new Descriptor('pip-services-accounts', 'client', 'memory', 'default', '*'), new AccountsMemoryClientV1());
-//         this.put(new Descriptor('pip-services-sessions', 'client', 'memory', 'default', '*'), new SessionsMemoryClientV1());
-//         // Add content management services
-//         // Beacons
-//         this.put(new Descriptor('pip-services-beacons', 'client', 'memory', 'default', '*'), new BeaconsMemoryClientV1());
-//     }
+	service.Configure(cconf.NewConfigParamsFromTuples(
+		"root_path", "", //"/api/1.0",
+		"connection.protocol", "http",
+		"connection.host", "0.0.0.0",
+		"connection.port", 3000,
+	))
+}
 
-//     private configureService(): void {
-//         // Configure Facade service
-//         let service = this.getOneRequired<HttpEndpoint>(
-//             new Descriptor('pip-services', 'endpoint', 'http', 'default', '*')
-//         );
-//         service.configure(ConfigParams.fromTuples(
-//             'root_path', '', //'/api/1.0',
-//             'connection.protocol', 'http',
-//             'connection.host', '0.0.0.0',
-//             'connection.port', 3000
-//         ));
-//     }
+func (c *TestReferences) createUsersAndSessions() {
+	// Create accounts
+	dependency, _ := c.GetOneRequired(cref.NewDescriptor("pip-services-accounts", "client", "*", "*", "*"))
+	accountsClient, ok1 := dependency.(accclients1.IAccountsClientV1)
+	if !ok1 {
+		panic("TestReferences: Cant't resolv dependency 'client' to IAccountsClientV1")
+	}
 
-//     private createUsersAndSessions(): void {
-//         // Create accounts
-//         let accountsClient = this.getOneRequired<IAccountsClientV1>(
-//             new Descriptor('pip-services-accounts', 'client', '*', '*', '*')
-//         );
+	adminUserAccount := accclients1.AccountV1{
+		Id:         TestUsers.AdminUserId,
+		Login:      TestUsers.AdminUserLogin,
+		Name:       TestUsers.AdminUserName,
+		Active:     true,
+		CreateTime: time.Time{},
+	}
+	accountsClient.CreateAccount("", &adminUserAccount)
 
-//         let adminUserAccount = <AccountV1>{
-//             id: TestUsers.AdminUserId, 
-//             login: TestUsers.AdminUserLogin, 
-//             name: TestUsers.AdminUserName,
-//             active: true,
-//             create_time: new Date()
-//         };
-//         accountsClient.createAccount(null, adminUserAccount, () => {});
+	user1Account := accclients1.AccountV1{
+		Id:         TestUsers.User1Id,
+		Login:      TestUsers.User1Login,
+		Name:       TestUsers.User1Name,
+		Active:     true,
+		CreateTime: time.Time{},
+	}
+	accountsClient.CreateAccount("", &user1Account)
 
-//         let user1Account = <AccountV1>{
-//             id: TestUsers.User1Id, 
-//             login: TestUsers.User1Login, 
-//             name: TestUsers.User1Name,
-//             active: true,
-//             create_time: new Date()
-//         };
-//         accountsClient.createAccount(null, user1Account, () => {});
+	user2Account := accclients1.AccountV1{
+		Id:         TestUsers.User2Id,
+		Login:      TestUsers.User2Login,
+		Name:       TestUsers.User2Name,
+		Active:     true,
+		CreateTime: time.Time{},
+	}
+	accountsClient.CreateAccount("", &user2Account)
 
-//         let user2Account = <AccountV1>{
-//             id: TestUsers.User2Id, 
-//             login: TestUsers.User2Login, 
-//             name: TestUsers.User2Name,
-//             active: true,
-//             create_time: new Date()
-//         };
-//         accountsClient.createAccount(null, user2Account, () => {});
+	// Create opened sessions
 
-//         // Create opened sessions
-//         let sessionsClient = this.getOneRequired<ISessionsClientV1>(
-//             new Descriptor('pip-services-sessions', 'client', '*', '*', '*')
-//         );
+	dependency, _ = c.GetOneRequired(cref.NewDescriptor("pip-services-sessions", "client", "*", "*", "*"))
+	sessionsClient, ok2 := dependency.(sessclients1.ISessionsClientV1)
+	if !ok2 {
+		panic("TestReferences: Cant't resolv dependency 'client' to ISessionsClientV1")
+	}
 
-//         let adminUserData = _.clone(adminUserAccount);
-//         adminUserData.roles = ['admin'];
-//         sessionsClient.openSession(
-//             null, TestUsers.AdminUserId, TestUsers.AdminUserName,
-//             null, null, adminUserData, null,
-//             (err, session) => { session.id = TestUsers.AdminUserSessionId });
+	adminUserData := c.cloneAccountToUserData(&adminUserAccount)
+	adminUserData.Roles = []string{"admin"}
+	session, _ := sessionsClient.OpenSession(
+		"", TestUsers.AdminUserId, TestUsers.AdminUserName,
+		"", "", adminUserData, nil)
+	session.Id = TestUsers.AdminUserSessionId
 
-//         let user1Data = _.clone(user1Account);
-//         user1Data.roles = [];
-//         sessionsClient.openSession(
-//             null, TestUsers.User1Id, TestUsers.User1Name,
-//             null, null, user1Data, null,
-//             (err, session) => { session.id = TestUsers.User1SessionId });
+	user1Data := c.cloneAccountToUserData(&user1Account)
+	user1Data.Roles = make([]string, 0)
 
-//         let user2Data = _.clone(user2Account);
-//         user2Data.roles = [];
-//         sessionsClient.openSession(
-//             null, TestUsers.User2Id, TestUsers.User2Name,
-//             null, null, user2Data, null,
-//             (err, session) => { session.id = TestUsers.User2SessionId });
-//     }
+	session, _ = sessionsClient.OpenSession(
+		"", TestUsers.User1Id, TestUsers.User1Name,
+		"", "", user1Data, nil)
+	session.Id = TestUsers.User1SessionId
 
-// }
+	user2Data := c.cloneAccountToUserData(&user2Account)
+	user2Data.Roles = make([]string, 0)
+	session, _ = sessionsClient.OpenSession(
+		"", TestUsers.User2Id, TestUsers.User2Name,
+		"", "", user2Data, nil)
+	session.Id = TestUsers.User2SessionId
+}
+
+func (c *TestReferences) cloneAccountToUserData(account *accclients1.AccountV1) *operations1.SessionUserV1 {
+	if account == nil {
+		return nil
+	}
+	return &operations1.SessionUserV1{
+		Id:    account.Id,
+		Login: account.Login,
+		Name:  account.Name,
+
+		/* Activity tracking */
+		CreateTime: account.CreateTime,
+		/* User preferences */
+		TimeZone: account.TimeZone,
+		Language: account.Language,
+		Theme:    account.Theme,
+
+		/* Custom fields */
+		CustomHdr: account.CustomHdr,
+		CustomDat: account.CustomDat,
+	}
+}

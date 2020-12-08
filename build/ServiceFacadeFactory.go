@@ -14,9 +14,6 @@ func NewServiceFacadeFactory() *ServiceFacadeFactory {
 		CompositeFactory: *cbuild.NewCompositeFactory(),
 	}
 
-	// c.Add(NewAccountsServiceFactory())
-	// c.Add(NewSessionsServiceFactory())
-	// c.Add(NewPasswordsServiceFactory())
-	// c.Add(NewRolesServiceFactory())
 	c.Add(bbuild.NewBeaconsServiceFactory())
+	return c
 }

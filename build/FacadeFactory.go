@@ -8,10 +8,11 @@ import (
 
 type FacadeFactory struct {
 	cbuild.Factory
-	NullClientDescriptor   *cref.Descriptor
-	DirectClientDescriptor *cref.Descriptor
-	HttpClientDescriptor   *cref.Descriptor
-	GrpcClientDescriptor   *cref.Descriptor
+	NullClientDescriptor      *cref.Descriptor
+	DirectClientDescriptor    *cref.Descriptor
+	HttpClientDescriptor      *cref.Descriptor
+	GrpcClientDescriptor      *cref.Descriptor
+	FacadeServiceV1Descriptor *cref.Descriptor
 }
 
 func NewFacadeFactory() *FacadeFactory {

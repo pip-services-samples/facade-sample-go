@@ -1,108 +1,110 @@
-// let _ = require('lodash');
-// let async = require('async');
-// let assert = require('chai').assert;
+package test_operations
 
-// import { TestReferences } from '../../fixtures/TestReferences';
-// import { TestRestClient } from '../../fixtures/TestRestClient';
+import (
+	"testing"
 
-// suite('SessionRoutesV1', () => {
-//     let USER = {
-//         login: 'test',
-//         name: 'Test User',
-//         email: 'test@conceptual.vision',
-//         password: 'test123'
-//     };
+	testfixture "github.com/pip-services-samples/pip-samples-facade-go/test/fixtures"
+	"github.com/stretchr/testify/assert"
+)
 
-//     let references: TestReferences;
-//     let rest: TestRestClient;
+type sessionRoutesV1Test struct {
+	references *testfixture.TestReferences
+	rest       *testfixture.TestRestClient
+	user       map[string]string
+}
 
-//     setup((done) => {
-//         rest = new TestRestClient();
-//         references = new TestReferences();
-//         references.open(null, done);
-//     });
+func newSessionRoutesV1Test() *sessionRoutesV1Test {
+	c := &sessionRoutesV1Test{
+		user: make(map[string]string, 0),
+	}
 
-//     teardown((done) => {
-//         references.close(null, done);
-//     });
+	c.user["login"] = "test"
+	c.user["name"] = "Test User"
+	c.user["email"] = "test@conceptual.vision"
+	c.user["password"] = "test123"
 
-//     test('should signup new user', (done) => {
-//         rest.post('/api/v1/users/signup',
-//             USER,
-//             (err, req, res, session) => {
-//                 assert.isNull(err);
+	return c
+}
 
-//                 assert.isDefined(session);
-//                 assert.isDefined(session.id);
-//                 assert.equal(session.user_name, USER.name);
+func (c *sessionRoutesV1Test) setup(t *testing.T) {
+	c.rest = testfixture.NewTestRestClient()
+	c.references = testfixture.NewTestReferences()
+	err := c.references.Open("")
+	if err != nil {
+		t.Error("Failed to open references", err)
+	}
+}
 
-//                 done();
-//             }
-//         );
-//     });
+func (c *sessionRoutesV1Test) teardown(t *testing.T) {
+	c.rest = nil
+	err := c.references.Close("")
+	if err != nil {
+		t.Error("Failed to close references", err)
+	}
+}
 
-//     test('should not signup with the same email', (done) => {
-//         async.series([
-//         // Sign up
-//             (callback) => {
-//                 rest.post('/api/v1/users/signup',
-//                     USER,
-//                     (err, req, res, session) => {
-//                         assert.isNull(err);
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Try to sign up again
-//             (callback) => {
-//                 rest.post('/api/v1/users/signup',
-//                     USER,
-//                     (err, req, res, session) => {
-//                         assert.isNotNull(err);
-//                         callback();
-//                     }
-//                 );
-//             }
-//         ], done);
+func (c *sessionRoutesV1Test) testSignupNewUser(t *testing.T) {
 
-//     });
+	session := make(map[string]interface{})
+	err := c.rest.Post("/api/v1/users/signup", c.user, &session)
 
-//     test('should signout', (done) => {
-//         rest.post('/api/v1/users/signout',
-//             null,
-//             (err, req, res, result) => {
-//                 assert.isNull(err);
-//                 done();
-//             }
-//         );
-//     });
+	assert.Nil(t, err)
+	assert.NotNil(t, session)
+	assert.NotNil(t, session["id"])
+	assert.Equal(t, session["user_name"], c.user["name"])
+}
 
-//     test('should signin with email and password', (done) => {
-//         async.series([
-//         // Sign up
-//             (callback) => {
-//                 rest.post('/api/v1/users/signup',
-//                     USER,
-//                     (err, req, res, session) => {
-//                         assert.isNull(err);
-//                         callback();
-//                     }
-//                 );
-//             },
-//         // Sign in with username
-//             (callback) => {
-//                 rest.post('/api/v1/users/signin',
-//                     {
-//                         login: USER.login,
-//                         password: USER.password
-//                     },
-//                     (err, req, res, session) => {
-//                         assert.isNull(err);
-//                         callback();
-//                     }
-//                 );
-//             }
-//         ], done);
-//     });
+func (c *sessionRoutesV1Test) testNotSignupWithTheSameEmail(t *testing.T) {
 
-// });
+	// Sign up
+	session := make(map[string]interface{})
+	err := c.rest.Post("/api/v1/users/signup", c.user, &session)
+	assert.Nil(t, err)
+	// Try to sign up agai
+	err = c.rest.Post("/api/v1/users/signup", c.user, &session)
+	assert.NotNil(t, err)
+}
+
+func (c *sessionRoutesV1Test) testShouldSignout(t *testing.T) {
+	result := make(map[string]interface{})
+	err := c.rest.Post("/api/v1/users/signout", nil, &result)
+	assert.NotNil(t, err)
+}
+
+func (c *sessionRoutesV1Test) testShouldSigninWithEmailAndPassword(t *testing.T) {
+
+	// Sign up
+	session := make(map[string]interface{})
+	err := c.rest.Post("/api/v1/users/signup",
+		c.user, &session)
+	assert.NotNil(t, err)
+
+	// Sign in with username
+
+	err = c.rest.Post("/api/v1/users/signin",
+		map[string]string{
+			"login":    c.user["login"],
+			"password": c.user["password"],
+		}, &session)
+	assert.NotNil(t, err)
+}
+
+func TestSessionRoutesV1(t *testing.T) {
+	c := newSessionRoutesV1Test()
+
+	c.setup(t)
+	t.Run("Signup New User", c.testSignupNewUser)
+	c.teardown(t)
+
+	c.setup(t)
+	t.Run("Not Signup With The Same Email", c.testNotSignupWithTheSameEmail)
+	c.teardown(t)
+
+	c.setup(t)
+	t.Run("Should Signout", c.testShouldSignout)
+	c.teardown(t)
+
+	c.setup(t)
+	t.Run("Should Signin With Email And Password", c.testShouldSigninWithEmailAndPassword)
+	c.teardown(t)
+}
