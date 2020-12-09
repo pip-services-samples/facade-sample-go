@@ -23,35 +23,35 @@
     password: {{MONGO_PASS}}
 
 # Accounts components
-- descriptor: "pip-services-accounts:client:http:default:*"
+- descriptor: "pip-services-accounts:client:commandable-http:default:*"
   connection:
     protocol: "http"
     host: "localhost"
     port: 8082
 
 # Roles components
-- descriptor: "pip-services-roles:client:http:default:*"
+- descriptor: "pip-services-roles:client:commandable-http:default:*"
   connection:
     protocol: "http"
     host: "localhost"
     port: 8083
 
 # Passwords components
-- descriptor: "pip-services-passwords:client:http:default:*"
+- descriptor: "pip-services-passwords:client:commandable-http:default:*"
   connection:
     protocol: "http"
     host: "localhost"
     port: 8084
 
 # Session components
-- descriptor: "pip-services-sessions:client:http:default:*"
+- descriptor: "pip-services-sessions:client:commandable-http:default:*"
   connection:
     protocol: "http"
     host: "localhost"
     port: 8085
 
 # Beacons components
-- descriptor: "pip-services-beacons:client:http:default:*"
+- descriptor: "pip-services-beacons:client:commandable-http:default:*"
   connection:
     protocol: "http"
     host: "localhost"
@@ -64,10 +64,6 @@
     protocol: "http"
     host: "0.0.0.0"
     port: 8080
-  options:
-    debug: true
-    maintenance_enabled: false
-    max_req_size: "1mb"
 
 # Facade API V1
 - descriptor: "pip-facades-example:service:http:default:1.0"

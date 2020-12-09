@@ -20,7 +20,7 @@ services:
       - sessions
       - beacons     
       
-    command: node /app/bin/run.js -c /app/config/config-distributed.yml
+    command: ./bin/main -c ./config/config-distributed.yml
 
   mongo:
     image: mongo:latest

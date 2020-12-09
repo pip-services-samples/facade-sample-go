@@ -8,21 +8,15 @@ import (
 
 type FacadeFactory struct {
 	cbuild.Factory
-	NullClientDescriptor      *cref.Descriptor
-	DirectClientDescriptor    *cref.Descriptor
-	HttpClientDescriptor      *cref.Descriptor
-	GrpcClientDescriptor      *cref.Descriptor
 	FacadeServiceV1Descriptor *cref.Descriptor
 }
 
 func NewFacadeFactory() *FacadeFactory {
 
-	bcf := FacadeFactory{}
-	bcf.Factory = *cbuild.NewFactory()
-
-	bcf.FacadeServiceV1Descriptor = cref.NewDescriptor("pip-facades-example", "service", "http", "*", "1.0")
-
-	bcf.RegisterType(bcf.FacadeServiceV1Descriptor, service1.NewFacadeServiceV1)
-
-	return &bcf
+	c := FacadeFactory{
+		Factory: *cbuild.NewFactory(),
+	}
+	c.FacadeServiceV1Descriptor = cref.NewDescriptor("pip-facades-example", "service", "http", "*", "1.0")
+	c.RegisterType(c.FacadeServiceV1Descriptor, service1.NewFacadeServiceV1)
+	return &c
 }

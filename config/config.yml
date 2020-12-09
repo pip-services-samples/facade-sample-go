@@ -2,7 +2,7 @@
 # Container info
 - descriptor: "pip-services:container-info:default:default:*"
   name: "pip-facades-example"
-  description: "Example Pip.Services facade"
+  description: "Example Pip.Services facade on Golang"
 
 # Console logger
 - descriptor: "pip-services:logger:console:default:*"
@@ -26,7 +26,7 @@
 # Accounts components
 # - descriptor: "pip-services-accounts:persistence:mongodb:default:*"
 # - descriptor: "pip-services-accounts:controller:default:default:*"
-- descriptor: "pip-services-accounts:client:memory:default:*"
+- descriptor: "pip-services-accounts:client:memory:default:1.0"
 
 # Roles components
 # - descriptor: "pip-services-roles:persistence:mongodb:default:*"
@@ -55,10 +55,6 @@
     protocol: "http"
     host: "0.0.0.0"
     port: 8080
-  options:
-    debug: true
-    maintenance_enabled: false
-    max_req_size: "1mb"
 
 # Facade API V1
 - descriptor: "pip-facades-example:service:http:default:1.0"

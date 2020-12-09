@@ -6,23 +6,15 @@ services:
       context: ../
       dockerfile: ./docker/Dockerfile.test
     image: ${IMAGE:-pip/test}
-    command: ${TEST_CMD:-npm test}
     depends_on:
       - mongo
-      - memcached
     environment:
       - MONGO_SERVICE_HOST=mongo
       - MONGO_SERVICE_PORT=27017
       - MONGO_DB=piplifetest      
-      - MEMCACHED_HOST=memcached
-      - MEMCACHED_PORT=11211
 
   mongo:
     image: mongo:latest
     ports:
       - "27017:27017"
 
-  # memcached:
-  #   image: memcached:latest
-  #   ports:
-  #     - "11211:11211"

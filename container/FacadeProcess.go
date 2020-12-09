@@ -8,17 +8,18 @@ import (
 )
 
 type FacadeProcess struct {
-	cproc.ProcessContainer
+	*cproc.ProcessContainer
 }
 
-func NewBFacadeProcess() *FacadeProcess {
+func NewFacadeProcess() *FacadeProcess {
 
-	bp := FacadeProcess{}
-	bp.ProcessContainer = *cproc.NewEmptyProcessContainer()
-	bp.AddFactory(ffactory.NewClientFacadeFactory())
-	bp.AddFactory(ffactory.NewServiceFacadeFactory())
-	bp.AddFactory(rpcbuild.NewDefaultRpcFactory())
-	bp.AddFactory(mbuild.NewDefaultMongoDbFactory())
+	c := FacadeProcess{}
+	c.ProcessContainer = cproc.NewProcessContainer("pip-facades-example", "Public facade for pip-vault 2.0")
+	c.AddFactory(ffactory.NewClientFacadeFactory())
+	c.AddFactory(ffactory.NewServiceFacadeFactory())
+	c.AddFactory(ffactory.NewFacadeFactory())
+	c.AddFactory(rpcbuild.NewDefaultRpcFactory())
+	c.AddFactory(mbuild.NewDefaultMongoDbFactory())
 
-	return &bp
+	return &c
 }

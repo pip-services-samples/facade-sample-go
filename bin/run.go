@@ -1,11 +1,13 @@
 package main
 
-func main() {
-	// let FacadeProcess = require('../obj/src/container/FacadeProcess').FacadeProcess;
+import (
+	"os"
 
-	// try {
-	//     new FacadeProcess().run(process.argv);
-	// } catch (ex) {
-	//     console.error(ex);
-	// }
+	cont "github.com/pip-services-samples/pip-samples-facade-go/container"
+)
+
+func main() {
+	proc := cont.NewFacadeProcess()
+	proc.SetConfigPath("./config/config.yml")
+	proc.Run(os.Args)
 }
