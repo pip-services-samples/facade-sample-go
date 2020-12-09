@@ -3,8 +3,8 @@ package test_operations
 import (
 	"testing"
 
-	data1 "github.com/nov-pocs/samples/service-beacons-go/data/version1"
 	testfixture "github.com/pip-services-samples/pip-samples-facade-go/test/fixtures"
+	data1 "github.com/pip-services-samples/pip-services-beacons-go/data/version1"
 	cdata "github.com/pip-services3-go/pip-services3-commons-go/data"
 	"github.com/stretchr/testify/assert"
 )
@@ -74,7 +74,7 @@ func (c *beaconsRestServiceV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, c.BEACON1.Label, beacon.Label)
 	assert.NotNil(t, beacon.Center)
 
-	err = c.rest.PostAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons/beacons", c.BEACON2, &beacon)
+	err = c.rest.PostAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons", c.BEACON2, &beacon)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, c.BEACON2.Udi, beacon.Udi)
@@ -84,7 +84,7 @@ func (c *beaconsRestServiceV1Test) testCrudOperations(t *testing.T) {
 	assert.NotNil(t, beacon.Center)
 
 	var page data1.BeaconV1DataPage
-	err = c.rest.GetAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons/beacons", &page)
+	err = c.rest.GetAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons", &page)
 	assert.Nil(t, err)
 	assert.NotNil(t, page)
 	assert.Len(t, page.Data, 2)
@@ -92,7 +92,7 @@ func (c *beaconsRestServiceV1Test) testCrudOperations(t *testing.T) {
 
 	// Update the beacon
 	beacon1.Label = "ABC"
-	err = c.rest.PutAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons/beacons/", beacon1, &beacon)
+	err = c.rest.PutAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons", beacon1, &beacon)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
@@ -116,13 +116,13 @@ func (c *beaconsRestServiceV1Test) testCrudOperations(t *testing.T) {
 	assert.Equal(t, (float32)(0.0), position.Coordinates[0][0])
 	assert.Equal(t, (float32)(0.0), position.Coordinates[0][1])
 
-	err = c.rest.DelAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons/beacons/"+beacon1.Id, &beacon)
+	err = c.rest.DelAsUser(testfixture.TestUsers.AdminUserSessionId, "/api/v1/beacons/"+beacon1.Id, &beacon)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Equal(t, beacon1.Id, beacon.Id)
 
 	beacon = data1.BeaconV1{}
-	err = c.rest.GetAsUser(testfixture.TestUsers.User1SessionId, "/api/v1/beacons/beacons/"+beacon1.Id+"?user_id="+testfixture.TestUsers.User1Id, &beacon)
+	err = c.rest.GetAsUser(testfixture.TestUsers.User1SessionId, "/api/v1/beacons/"+beacon1.Id+"?user_id="+testfixture.TestUsers.User1Id, &beacon)
 	assert.Nil(t, err)
 	assert.NotNil(t, beacon)
 	assert.Empty(t, beacon)

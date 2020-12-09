@@ -68,7 +68,7 @@ func (c *sessionRoutesV1Test) testNotSignupWithTheSameEmail(t *testing.T) {
 func (c *sessionRoutesV1Test) testShouldSignout(t *testing.T) {
 	result := make(map[string]interface{})
 	err := c.rest.Post("/api/v1/users/signout", nil, &result)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 func (c *sessionRoutesV1Test) testShouldSigninWithEmailAndPassword(t *testing.T) {
@@ -77,16 +77,15 @@ func (c *sessionRoutesV1Test) testShouldSigninWithEmailAndPassword(t *testing.T)
 	session := make(map[string]interface{})
 	err := c.rest.Post("/api/v1/users/signup",
 		c.user, &session)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 
 	// Sign in with username
-
 	err = c.rest.Post("/api/v1/users/signin",
 		map[string]string{
 			"login":    c.user["login"],
 			"password": c.user["password"],
 		}, &session)
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 }
 
 func TestSignupNewUser(t *testing.T) {

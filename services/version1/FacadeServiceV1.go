@@ -57,15 +57,15 @@ func (c *FacadeServiceV1) registerContentManagementRoutes(auth *AuthorizerV1) {
 	// Beacons routes
 	c.RegisterRouteWithAuth("get", "/beacons", nil, auth.Signed(),
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.GetBeacons(res, req) })
-	c.RegisterRouteWithAuth("get", "/beacons/:id", nil, auth.Owner("user_id"),
+	c.RegisterRouteWithAuth("get", "/beacons/{id}", nil, auth.Owner("user_id"),
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.GetBeaconById(res, req) })
-	c.RegisterRouteWithAuth("get", "/beacons/udi/:udi", nil, auth.Owner(""),
+	c.RegisterRouteWithAuth("get", "/beacons/udi/{udi}", nil, auth.Owner(""),
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.GetBeaconByUdi(res, req) })
 	c.RegisterRouteWithAuth("post", "/beacons", nil, auth.Signed(),
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.CreateBeacon(res, req) })
 	c.RegisterRouteWithAuth("put", "/beacons", nil, auth.Signed(),
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.UpdateBeacon(res, req) })
-	c.RegisterRouteWithAuth("del", "/beacons/:id", nil, auth.Signed(),
+	c.RegisterRouteWithAuth("delete", "/beacons/{id}", nil, auth.Signed(),
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.DeleteBeaconById(res, req) })
 	c.RegisterRouteWithAuth("post", "/beacons/position", nil, auth.Signed(),
 		func(res http.ResponseWriter, req *http.Request) { c.beaconsOperations.CalculatePosition(res, req) })

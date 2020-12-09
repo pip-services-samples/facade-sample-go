@@ -66,7 +66,7 @@ func (c *AuthorizerV1) Owner(idParam string) func(res http.ResponseWriter, req *
 					"User id is not defined").WithStatus(401),
 			)
 		} else {
-			isOwner := partyId == user.GetAsString("id")
+			isOwner := partyId == user.GetAsString("Id")
 
 			if !isOwner {
 				rpcservices.HttpResponseSender.SendError(

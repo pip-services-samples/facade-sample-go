@@ -24,24 +24,24 @@
 
 
 # Accounts components
-- descriptor: "pip-services-accounts:persistence:mongodb:default:*"
-- descriptor: "pip-services-accounts:controller:default:default:*"
-- descriptor: "pip-services-accounts:client:direct:default:*"
+# - descriptor: "pip-services-accounts:persistence:mongodb:default:*"
+# - descriptor: "pip-services-accounts:controller:default:default:*"
+- descriptor: "pip-services-accounts:client:memory:default:*"
 
 # Roles components
-- descriptor: "pip-services-roles:persistence:mongodb:default:*"
-- descriptor: "pip-services-roles:controller:default:default:*"
-- descriptor: "pip-services-roles:client:direct:default:*"
+# - descriptor: "pip-services-roles:persistence:mongodb:default:*"
+# - descriptor: "pip-services-roles:controller:default:default:*"
+- descriptor: "pip-services-roles:client:memory:default:*"
 
 # Passwords components
-- descriptor: "pip-services-passwords:persistence:mongodb:default:*"
-- descriptor: "pip-services-passwords:controller:default:default:*"
-- descriptor: "pip-services-passwords:client:direct:default:*"
+# - descriptor: "pip-services-passwords:persistence:mongodb:default:*"
+# - descriptor: "pip-services-passwords:controller:default:default:*"
+- descriptor: "pip-services-passwords:client:memory:default:*"
 
 # Session components
-- descriptor: "pip-services-sessions:persistence:mongodb:default:*"
-- descriptor: "pip-services-sessions:controller:default:default:*"
-- descriptor: "pip-services-sessions:client:direct:default:*"
+# - descriptor: "pip-services-sessions:persistence:mongodb:default:*"
+# - descriptor: "pip-services-sessions:controller:default:default:*"
+- descriptor: "pip-services-sessions:client:memory:default:*"
 
 # Beacons components
 - descriptor: "pip-services-beacons:persistence:mongodb:default:*"

@@ -62,7 +62,7 @@ func (c *TestReferences) appendDependencies() {
 	// Add user management services
 	c.Put(cref.NewDescriptor("pip-services-accounts", "client", "memory", "default", "*"), accclients1.NewAccountsMemoryClientV1(nil))
 	c.Put(cref.NewDescriptor("pip-services-sessions", "client", "memory", "default", "*"), sessclients1.NewSessionsMemoryClientV1())
-	c.Put(cref.NewDescriptor("pip-services-passwords", "client", "commandable-http", "default", "*"), passclients1.NewPasswordsHttpCommandableClientV1())
+	c.Put(cref.NewDescriptor("pip-services-passwords", "client", "commandable-http", "default", "*"), passclients1.NewPasswordsMemoryClientV1())
 	c.Put(cref.NewDescriptor("pip-services-roles", "client", "commandable-http", "default", "*"), roleclients1.NewRolesMemoryClientV1())
 
 	// Add content management services
@@ -85,16 +85,6 @@ func (c *TestReferences) configureService() {
 		"connection.port", 3000,
 	))
 
-	dependency, _ = c.GetOneRequired(cref.NewDescriptor("pip-services-passwords", "client", "*", "default", "*"))
-	passClient, ok2 := dependency.(*passclients1.PasswordsHttpCommandableClientV1)
-	if !ok2 {
-		panic("SessionOperationsV1: Cant't resolv dependency 'client' to IPasswordsClientV1")
-	}
-	passClient.Configure(cconf.NewConfigParamsFromTuples(
-		"connection.protocol", "http",
-		"connection.host", "localhost",
-		"connection.port", 3001,
-	))
 }
 
 func (c *TestReferences) createUsersAndSessions() {

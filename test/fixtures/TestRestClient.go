@@ -91,7 +91,7 @@ func (c *TestRestClient) Put(path string, params interface{}, result interface{}
 }
 
 func (c *TestRestClient) Del(path string, result interface{}) error {
-	return c.invoke("del", path, nil, nil, result)
+	return c.invoke("delete", path, nil, nil, result)
 }
 
 func (c *TestRestClient) GetAsUser(sessionId string, path string, result interface{}) error {
@@ -111,5 +111,5 @@ func (c *TestRestClient) PutAsUser(sessionId string, path string, params interfa
 }
 
 func (c *TestRestClient) DelAsUser(sessionId string, path string, result interface{}) error {
-	return c.invoke("del", path, map[string]string{"x-session-id": sessionId}, nil, result)
+	return c.invoke("delete", path, map[string]string{"x-session-id": sessionId}, nil, result)
 }

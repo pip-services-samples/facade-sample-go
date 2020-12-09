@@ -12,6 +12,7 @@ import (
 	sessclients1 "github.com/pip-services-users/pip-clients-sessions-go/version1"
 
 	cconf "github.com/pip-services3-go/pip-services3-commons-go/config"
+	cdata "github.com/pip-services3-go/pip-services3-commons-go/data"
 	cerr "github.com/pip-services3-go/pip-services3-commons-go/errors"
 	cref "github.com/pip-services3-go/pip-services3-commons-go/refer"
 	rpcservices "github.com/pip-services3-go/pip-services3-rpc-go/services"
@@ -110,7 +111,7 @@ func (c *SessionsOperationsV1) LoadSession(res http.ResponseWriter, req *http.Re
 			// Associate session user with the request
 			req = req.WithContext(context.WithValue(req.Context(), "user_id", session.UserId))
 			req = req.WithContext(context.WithValue(req.Context(), "user_name", session.UserName))
-			req = req.WithContext(context.WithValue(req.Context(), "user", session.User))
+			req = req.WithContext(context.WithValue(req.Context(), "user", *cdata.NewAnyValueMapFromValue(session.User)))
 			req = req.WithContext(context.WithValue(req.Context(), "session_id", session.Id))
 			next.ServeHTTP(res, req)
 		} else {
