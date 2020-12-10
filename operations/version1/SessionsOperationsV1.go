@@ -2,6 +2,7 @@ package operations1
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -109,9 +110,12 @@ func (c *SessionsOperationsV1) LoadSession(res http.ResponseWriter, req *http.Re
 
 		if err == nil {
 			// Associate session user with the request
+			buf, _ := json.Marshal(session.User)
+			user := make(map[string]interface{}, 0)
+			json.Unmarshal(buf, &user)
 			req = req.WithContext(context.WithValue(req.Context(), "user_id", session.UserId))
 			req = req.WithContext(context.WithValue(req.Context(), "user_name", session.UserName))
-			req = req.WithContext(context.WithValue(req.Context(), "user", *cdata.NewAnyValueMapFromValue(session.User)))
+			req = req.WithContext(context.WithValue(req.Context(), "user", *cdata.NewAnyValueMapFromValue(user)))
 			req = req.WithContext(context.WithValue(req.Context(), "session_id", session.Id))
 			next.ServeHTTP(res, req)
 		} else {
@@ -232,6 +236,13 @@ func (c *SessionsOperationsV1) Signin(res http.ResponseWriter, req *http.Request
 	login := c.GetParam(req, "login")
 	password := c.GetParam(req, "password")
 
+	if login == "" && password == "" {
+		params := make(map[string]string, 0)
+		c.DecodeBody(req, &params)
+		login = params["login"]
+		password = params["password"]
+	}
+
 	roles := make([]string, 0)
 
 	wg := sync.WaitGroup{}
@@ -252,6 +263,10 @@ func (c *SessionsOperationsV1) Signin(res http.ResponseWriter, req *http.Request
 				"WRONG_LOGIN",
 				"Account "+login+" was not found",
 			).WithDetails("login", login)
+			if err != nil {
+				c.SendError(res, req, err)
+				return
+			}
 		}
 
 		// Authenticate user

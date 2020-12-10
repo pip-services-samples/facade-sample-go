@@ -14,8 +14,8 @@
 # Mongodb connection
 - descriptor: "pip-services:connection:mongodb:default:*"
   connection:
-    uri: {{{MONGO_SERVICE_URI}}}
-    host: {{{MONGO_SERVICE_HOST}}}{{#unless MONGO_SERVICE_HOST}}localhost{{/unless}}
+    uri: {{MONGO_SERVICE_URI}}
+    host: {{MONGO_SERVICE_HOST}}{{#unless MONGO_SERVICE_HOST}}localhost{{/unless}}
     port: {{MONGO_SERVICE_PORT}}{{#unless MONGO_SERVICE_PORT}}27017{{/unless}}
     database: {{MONGO_DB}}{{#unless MONGO_DB}}app{{/unless}}
   credential:
@@ -26,36 +26,35 @@
 - descriptor: "pip-services-accounts:client:commandable-http:default:*"
   connection:
     protocol: "http"
-    host: "localhost"
-    port: 8082
-
+    host: {{ACCOUNT_SERVICE_HOST}}{{#unless ACCOUNT_SERVICE_HOST}}localhost{{/unless}}
+    port: 8080
 # Roles components
 - descriptor: "pip-services-roles:client:commandable-http:default:*"
   connection:
     protocol: "http"
-    host: "localhost"
-    port: 8083
+    host: {{ROLES_SERVICE_HOST}}{{#unless ROLES_SERVICE_HOST}}localhost{{/unless}}
+    port: 8080
 
 # Passwords components
 - descriptor: "pip-services-passwords:client:commandable-http:default:*"
   connection:
     protocol: "http"
-    host: "localhost"
-    port: 8084
+    host: {{PASSWORDS_SERVICE_HOST}}{{#unless PASSWORDS_SERVICE_HOST}}localhost{{/unless}}
+    port: 8080
 
 # Session components
 - descriptor: "pip-services-sessions:client:commandable-http:default:*"
   connection:
     protocol: "http"
-    host: "localhost"
-    port: 8085
+    host: {{SESSIONS_SERVICE_HOST}}{{#unless SESSIONS_SERVICE_HOST}}localhost{{/unless}}
+    port: 8080
 
 # Beacons components
 - descriptor: "pip-services-beacons:client:commandable-http:default:*"
   connection:
     protocol: "http"
-    host: "localhost"
-    port: 8086
+    host: {{BEACONS_SERVICE_HOST}}{{#unless BEACONS_SERVICE_HOST}}localhost{{/unless}}
+    port: 8080
 
 # Main facade service
 - descriptor: "pip-services:endpoint:http:default:*"

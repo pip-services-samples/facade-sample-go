@@ -10,6 +10,11 @@ services:
       - MONGO_SERVICE_HOST=mongo
       - MONGO_SERVICE_PORT=27017
       - MONGO_DB=app   
+      - ACCOUNT_SERVICE_HOST=accounts
+      - ROLES_SERVICE_HOST=role
+      - PASSWORDS_SERVICE_HOST=passwords
+      - SESSIONS_SERVICE_HOST=sessions
+      - BEACONS_SERVICE_HOST=beacons
     ports:
       - "8080:8080"
     links:
@@ -30,55 +35,51 @@ services:
   accounts:
     image: pipdevs/pip-services-accounts-node:latest
     environment:
+      - HTTP_ENABLED=true
       - MONGO_SERVICE_HOST=mongo
       - MONGO_SERVICE_PORT=27017
       - MONGO_DB=accounts
     links:
       - mongo   
-    ports:
-      - "8082:8080"
-  
+    
   role:
     image: pipdevs/pip-services-roles-node:latest
     environment:
+      - HTTP_ENABLED=true
       - MONGO_SERVICE_HOST=mongo
       - MONGO_SERVICE_PORT=27017
       - MONGO_DB=roles
     links:
         - mongo
-    ports:
-      - "8083:8080"
-
+   
   passwords: 
     image: pipdevs/pip-services-passwords-node:1.0.1-12-rc
     environment:
+      - HTTP_ENABLED=true
       - MONGO_SERVICE_HOST=mongo
       - MONGO_SERVICE_PORT=27017
       - MONGO_DB=passwd
     links:
         - mongo
-    ports:
-      - "8084:8080"
-
+   
   sessions:
     image: pipdevs/pip-services-sessions-node:1.0.1-19-rc
     environment:
+      - HTTP_ENABLED=true
       - MONGO_SERVICE_HOST=mongo
       - MONGO_SERVICE_PORT=27017
       - MONGO_DB=sessions
     links:
         - mongo
-    ports:
-      - "8085:8080"
-
+   
   beacons:
     image: pipdevs/pip-services-beacons-node:1.0
     environment:
+      - HTTP_ENABLED=true
       - MONGO_SERVICE_HOST=mongo
       - MONGO_SERVICE_PORT=27017
       - MONGO_DB=beacons
     links:
         - mongo
-    ports:
-      - "8086:8080"
+   
   
