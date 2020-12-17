@@ -6,7 +6,7 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/pip-services-samples/pip-clients-beacons-go v0.0.0-20201209165347-8cf6a344072a
 	github.com/pip-services-samples/pip-services-beacons-go v0.0.0-20201209162329-d64882fc859d
-	github.com/pip-services-users/pip-clients-accounts-go v0.0.0-20201210182729-f23d15ea9ab4
+	github.com/pip-services-users/pip-clients-accounts-go v0.0.0-20201217130732-5e2398ef6c6f
 	github.com/pip-services-users/pip-clients-passwords-go v0.0.0-20201210112918-9867bd534621
 	github.com/pip-services-users/pip-clients-roles-go v0.0.0-20201210110256-d265dd000a31
 	github.com/pip-services-users/pip-clients-sessions-go v0.0.0-20201210163054-340027b714e2
