@@ -16,14 +16,13 @@ type FacadeServiceV1 struct {
 }
 
 func NewFacadeServiceV1() *FacadeServiceV1 {
-	c := FacadeServiceV1{
-		RestService:        rpcservices.NewRestService(),
+	c := &FacadeServiceV1{
 		sessionsOperations: operations1.NewSessionsOperationsV1(),
 		beaconsOperations:  operations1.NewBeaconsOperationsV1(),
 	}
+	c.RestService = rpcservices.InheritRestService(c)
 	c.BaseRoute = "api/v1"
-	c.IRegisterable = &c
-	return &c
+	return c
 }
 
 func (c *FacadeServiceV1) Configure(config *cconf.ConfigParams) {
