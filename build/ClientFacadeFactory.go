@@ -1,7 +1,7 @@
 package build
 
 import (
-	bbuild "github.com/pip-services-samples/pip-clients-beacons-go/build"
+	bbuild "github.com/pip-services-samples/client-beacons-go/build"
 	accbuild "github.com/pip-services-users/pip-clients-accounts-go/build"
 	passbuild "github.com/pip-services-users/pip-clients-passwords-go/build"
 	rolebuild "github.com/pip-services-users/pip-clients-roles-go/build"

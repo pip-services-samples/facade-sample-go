@@ -3,7 +3,7 @@ package test_fixture
 import (
 	"time"
 
-	bclients1 "github.com/pip-services-samples/pip-clients-beacons-go/clients/version1"
+	bclients1 "github.com/pip-services-samples/client-beacons-go/clients/version1"
 	fbuild "github.com/pip-services-samples/pip-samples-facade-go/build"
 	operations1 "github.com/pip-services-samples/pip-samples-facade-go/operations/version1"
 	services1 "github.com/pip-services-samples/pip-samples-facade-go/services/version1"
@@ -67,7 +67,7 @@ func (c *TestReferences) appendDependencies() {
 
 	// Add content management services
 	// Beacons
-	c.Put(cref.NewDescriptor("pip-services-beacons", "client", "memory", "default", "*"), bclients1.NewBeaconsMemoryClientV1(nil))
+	c.Put(cref.NewDescriptor("beacons", "client", "memory", "default", "*"), bclients1.NewBeaconsMemoryClientV1(nil))
 }
 
 func (c *TestReferences) configureService() {

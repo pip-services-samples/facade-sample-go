@@ -44,9 +44,9 @@
 - descriptor: "pip-services-sessions:client:memory:default:*"
 
 # Beacons components
-- descriptor: "pip-services-beacons:persistence:mongodb:default:*"
-- descriptor: "pip-services-beacons:controller:default:default:*"
-- descriptor: "pip-services-beacons:client:direct:default:*"
+- descriptor: "beacons:persistence:mongodb:default:*"
+- descriptor: "beacons:controller:default:default:*"
+- descriptor: "beacons:client:direct:default:*"
 
 # Main facade service
 - descriptor: "pip-services:endpoint:http:default:*"

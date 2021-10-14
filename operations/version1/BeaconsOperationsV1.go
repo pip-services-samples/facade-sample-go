@@ -3,8 +3,8 @@ package operations1
 import (
 	"net/http"
 
-	clients1 "github.com/pip-services-samples/pip-clients-beacons-go/clients/version1"
-	services1 "github.com/pip-services-samples/pip-services-beacons-go/data/version1"
+	clients1 "github.com/pip-services-samples/client-beacons-go/clients/version1"
+	services1 "github.com/pip-services-samples/service-beacons-go/data/version1"
 
 	cref "github.com/pip-services3-go/pip-services3-commons-go/refer"
 	rpcservices "github.com/pip-services3-go/pip-services3-rpc-go/services"
@@ -20,7 +20,7 @@ func NewBeaconsOperationsV1() *BeaconsOperationsV1 {
 	c := BeaconsOperationsV1{
 		RestOperations: rpcservices.NewRestOperations(),
 	}
-	c.DependencyResolver.Put("beacons", cref.NewDescriptor("pip-services-beacons", "client", "*", "*", "1.0"))
+	c.DependencyResolver.Put("beacons", cref.NewDescriptor("beacons", "client", "*", "*", "1.0"))
 	c.correlationId = "beacons_operations"
 	return &c
 }

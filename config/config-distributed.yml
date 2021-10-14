@@ -50,7 +50,7 @@
     port: 8080
 
 # Beacons components
-- descriptor: "pip-services-beacons:client:commandable-http:default:*"
+- descriptor: "beacons:client:http:default:*"
   connection:
     protocol: "http"
     host: {{BEACONS_SERVICE_HOST}}{{#unless BEACONS_SERVICE_HOST}}localhost{{/unless}}
