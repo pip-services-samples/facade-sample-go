@@ -376,6 +376,8 @@ github.com/pip-services3-go/pip-services3-postgres-go v1.2.7/go.mod h1:8Sa/+R0jT
 github.com/pip-services3-go/pip-services3-rpc-go v1.3.1/go.mod h1:l/A3P+T7sHNYxBuZcGcZrN1rHL+6Pno+DLEdN2X+tHI=
 github.com/pip-services3-go/pip-services3-rpc-go v1.4.4-62 h1:Hq56dCkpbVPpVjhSZgci+JDsMsegmaOtMiF0hlBVHI8=
 github.com/pip-services3-go/pip-services3-rpc-go v1.4.4-62/go.mod h1:DqNP/28G9vjJMxIic3+gFzxyxKkr99OWSTeI7mic4nc=
+github.com/pip-services3-go/pip-services3-rpc-go v1.5.0-64 h1:4R/O/viVjYINxUAqz4JmNSrIOQobSl8jWel750QZNFg=
+github.com/pip-services3-go/pip-services3-rpc-go v1.5.0-64/go.mod h1:DqNP/28G9vjJMxIic3+gFzxyxKkr99OWSTeI7mic4nc=
 github.com/pkg/errors v0.8.0/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
